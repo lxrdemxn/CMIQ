@@ -19,14 +19,15 @@ bg = button('graphics/images_start_screen/resized_image.png','graphics/images_st
 bg.resize(parametres.screen_width, parametres.screen_height)  # Scale background to fit the window size
 bg_rect = bg.rect((parametres.screen_width // 2, parametres.screen_height // 2))
 
-level1_button= button('graphics/images_start_screen/level1_normal.png','graphics/images_start_screen/level1_hover.png')
-level1_rect = level1_button.rect((parametres.screen_width//2,100))  # Center the button
 # chargement et configuration des icons des bouttons
 level1_button= button('graphics/images_start_screen/level1_normal.png','graphics/images_start_screen/level1_hover.png')
 level1_rect = level1_button.rect((parametres.screen_width//2,100))  # Center the button
 
 level2_button = button('graphics/images_start_screen/level2_normal.png','graphics/images_start_screen/level2_hover.png')
 level2_rect = level1_button.rect((parametres.screen_width//2,180))  # Center the button
+
+level3_button = button('graphics/images_start_screen/level2_normal.png','graphics/images_start_screen/level2_hover.png')
+level3_rect = level1_button.rect((parametres.screen_width//2,260))  # Center the button
 
 # initialisation du niveau à 0 et de la variable "run"
 level_slct = 0
@@ -57,6 +58,15 @@ while run:
                 with open(file_path) as f:
                     code = f.read()
                     exec(code)
+
+            elif level3_rect.collidepoint(event.pos):
+                # au cas d'un click sur le boutton "LEVEL 2"
+                run = False
+                level_slct = 2
+                # ouverture du fichier du jeu avec le niveau 0
+                with open(file_path) as f:
+                    code = f.read()
+                    exec(code)
                     
     # vérifie si la souris est sur le boutton
     mouse_pos = pygame.mouse.get_pos()  # donne la position actuelle de la souris
@@ -69,11 +79,17 @@ while run:
         level2_button.is_hovered = True
     else:
         level2_button.is_hovered = False
+
+    if level3_rect.collidepoint(mouse_pos):  # si la souris est sur le boutton
+        level3_button.is_hovered = True
+    else:
+        level3_button.is_hovered = False
         
     # affichage des élements de l'écran
     bg.draw(screen, (0,0))
     level1_button.draw(screen, level1_rect.topleft)
     level2_button.draw(screen, level2_rect.topleft)
+    level3_button.draw(screen, level3_rect.topleft)
          
     pygame.display.update()
             

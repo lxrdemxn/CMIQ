@@ -1,15 +1,13 @@
 import pygame
 from tiles import *
-from settings import parametres
-import os
+from inf_settings import parametres_inf
 from player import *
 from particles import ParticleEffect
-import pygame.gfxdraw
 from audio import *
+import numpy as np
 
-
-class Level:
-    def __init__(self, map, screen):
+class Inf_Level:
+    def __init__(self, screen):
         """
         Initialise un niveau avec une carte et un écran.
 
@@ -25,7 +23,7 @@ class Level:
         - idle (bool) : Indicateur si le joueur est immobile ou non.
         """
         self.window = screen
-        self.loading_level(map)
+        self.map_0 = []
         self.deplacement = 0
         self.idle = False
         self.isincollisionh = False
@@ -35,103 +33,137 @@ class Level:
         self.dust_sprite = pygame.sprite.Group()
         self.player_on_ground = False
         self.bgx = 0  # Position horizontale du background
+        self.world_offset = 0  # Track how many columns have been removed from the map
         # player
         self.score = 0
         self.n=3
+        self.n_lines = len(parametres_inf.blocks_bank[0])
+        self.m = len(parametres_inf.blocks_bank[0][0])
         # coins
         self._7amra = 0
         self.dirham = 0
+        self.deplacement_counter = 0
 
-    def loading_level(self, map):
-        """
-        Charge le niveau en fonction de la carte donnée.
-
-        Arguments :
-        - map (list) : Une liste représentant la carte du niveau.
-        """
         self.obstacles = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
         self.bull = pygame.sprite.GroupSingle()
-        self.goal = pygame.sprite.Group()
         self.ground=pygame.sprite.Group()
         self.coins = pygame.sprite.Group()
         self.powerups = pygame.sprite.Group()  # Groupe pour les power-ups
         self.buses=pygame.sprite.Group()
-
         a= Bull(-50,100,150,450)
         self.bull.add(a)
-        n = len(map)
-        m = len(map[0])
+
+        self.loading_level(parametres_inf.blocks_bank[1::])
+
+    def cat_map(self, random_blocks:list[str]):
+        """_summary_
+            concatenates the actual map with a new map block chosen randomly
+        Args:
+            random_blocks (list[str]) : A list of random blocks
+        """
+        new_block = random_blocks[np.random.choice(range(1, len(random_blocks)))]
+        n = len(new_block)
+        m = len(new_block[0])
+
+        new_map = [(self.map_0[x][m::] + new_block[x]) for x in range(n)]
+        
+        self.map_0 = new_map
+        self.world_offset += m  # Track how many columns we've removed
+
+    def draw_map(self,n, m, start_col=0):
+        """_summary_
+
+        Args:
+            n (int): number of lines
+            m (int): number of rows
+            start_col (int): starting column index to begin drawing from
+            map (list[str]): the defined map to draw
+        """
         for i in range(n):
-            for j in range(m):
-                if map[i][j] == "X":
-                    pos = (j * parametres.tile_size, 100+i * parametres.tile_size)
-                    tile = Obstacle(pos, parametres.tile_size,"graphics/backgrounds/tuila.jpg")
+            for j in range(start_col, m):
+                # Calculate world position: map index + world offset gives absolute world column
+                # Then add bgx to match the current scroll state of existing tiles
+                world_x = (j + self.world_offset) * parametres_inf.tile_size + self.bgx
+                
+                if self.map_0[i][j] == "X":
+                    pos = (world_x, 100 + i * parametres_inf.tile_size)
+                    tile = Obstacle(pos, parametres_inf.tile_size,"graphics/backgrounds/tuila.jpg")
                     self.obstacles.add(tile)
-                elif map[i][j] == "P":
-                    p = Player(j * parametres.tile_size, 100+i * parametres.tile_size,self.window)
+                elif self.map_0[i][j] == "P":
+                    p = Player(world_x, 100+i * parametres_inf.tile_size,self.window)
                     self.player.add(p)
-                elif map[i][j]=="G":
-                    pos=(j * parametres.tile_size, 100+i * parametres.tile_size)
-                    tile = Ground(pos, parametres.tile_size)
+                elif self.map_0[i][j]=="G":
+                    pos=(world_x, 100+i * parametres_inf.tile_size)
+                    tile = Ground(pos, parametres_inf.tile_size)
                     self.ground.add(tile)
-                elif map[i][j] == "S":  # Bouclier
-                    pos = (j * parametres.tile_size, 100 + i * parametres.tile_size)
-                    powerup = Coin(pos, parametres.tile_size, 2, "graphics/coins/shield.png")  # Utiliser une image différente
+                elif self.map_0[i][j] == "S":  # Bouclier
+                    pos = (world_x, 100 + i * parametres_inf.tile_size)
+                    powerup = Coin(pos, parametres_inf.tile_size, 2, "graphics/coins/shield.png")  # Utiliser une image différente
                     self.powerups.add(powerup)
-
-                elif map[i][j]=="Y":
-                    g = Tile((j*parametres.tile_size,100+i*parametres.tile_size),parametres.tile_size)
-                    self.goal.add(g)
-
-                elif map[i][j]=="0":
-                    pos = (j * parametres.tile_size, 100+i * parametres.tile_size)
-                    coin = Coin(pos, parametres.tile_size, 0, "graphics/coins/1dh.png")
+                elif self.map_0[i][j]=="0":
+                    pos = (world_x, 100+i * parametres_inf.tile_size)
+                    coin = Coin(pos, parametres_inf.tile_size, 0, "graphics/coins/1dh.png")
                     self.coins.add(coin)
-                elif map[i][j]=="1":
-                    pos = (j * parametres.tile_size, 100+i * parametres.tile_size)
-                    coin = Coin(pos, parametres.tile_size, 1, "graphics/coins/10dh.png")
+                elif self.map_0[i][j]=="1":
+                    pos = (world_x, 100+i * parametres_inf.tile_size)
+                    coin = Coin(pos, parametres_inf.tile_size, 1, "graphics/coins/10dh.png")
                     self.coins.add(coin)
-                elif map[i][j]=="B":
-                    g = BUS((j*parametres.tile_size,100+i*parametres.tile_size),"graphics/backgrounds/bus.png")
+                elif self.map_0[i][j]=="B":
+                    g = BUS((world_x,100+i*parametres_inf.tile_size),"graphics/backgrounds/bus.png")
                     self.obstacles.add(g)                
-                elif map[i][j] == "A":  # Aimant
-                    pos = (j * parametres.tile_size, 100 + i * parametres.tile_size)
-                    powerup = Coin(pos, parametres.tile_size, 3, "graphics/coins/magnet.png")  # Utiliser une image différente
+                elif self.map_0[i][j] == "A":  # Aimant
+                    pos = (world_x, 100 + i * parametres_inf.tile_size)
+                    powerup = Coin(pos, parametres_inf.tile_size, 3, "graphics/coins/magnet.png")  # Utiliser une image différente
                     self.powerups.add(powerup)
-                elif map[i][j]=="M":    
-                    pos = (j * parametres.tile_size, 100+i * parametres.tile_size)
-                    mv_tile = Obstacle(pos, parametres.tile_size,"graphics/backgrounds/tuila.jpg", is_moving = True)
+                elif self.map_0[i][j]=="M":    
+                    pos = (world_x, 100+i * parametres_inf.tile_size)
+                    mv_tile = Obstacle(pos, parametres_inf.tile_size,"graphics/backgrounds/tuila.jpg", is_moving = True)
                     self.obstacles.add(mv_tile)
-                elif map[i][j]=="W":
-                    g = BUS((j*parametres.tile_size,100+i*parametres.tile_size),"graphics/backgrounds/mur.png",size = (100,363))
+                elif self.map_0[i][j]=="W":
+                    g = BUS((world_x,100+i*parametres_inf.tile_size),"graphics/backgrounds/mur.png",size = (100,363))
                     self.obstacles.add(g)
+    
+    def loading_level(self, random_blocks):
+        """
+        Charge le niveau en fonction de la carte donnée.
+
+        Arguments :
+        - random_blocks (list) : Une liste représentant la carte du niveau.
+        """
+        
+        n = len(random_blocks[0])
+        m = len(random_blocks[0][0])
+
+        init_blocks = [random_blocks[0]] + [random_blocks[np.random.choice(range(1,len(random_blocks)))] for _ in range(2)]
+
+        self.map_0 = [(init_blocks[0][k]+init_blocks[1][k]+init_blocks[2][k]) for k in range(n)]
+
+        self.draw_map(n, len(self.map_0[0]))
+        
+        # Ensure player exists - if not created from map, create manually
+        if len(self.player.sprites()) == 0:
+            p = Player(100, 100 + (n - 2) * parametres_inf.tile_size, self.window)
+            self.player.add(p)
              
-    def win_situation(self):
-        """
-        Vérifie si le joueur atteint l'objectif de fin du niveau.
-        Met à jour l'état de victoire en fonction de la collision entre le joueur et l'objectif.
-        """
-        p = self.player.sprite
-        for sprite in self.goal.sprites():
-            if sprite.rect.colliderect(p.rect):
-                music('./music/win.wav', 1)
-                self.win = True
                 
     def bordure_x(self):
         """
         Gère les bordures horizontales du niveau pour le déplacement du joueur.
         """
         p = self.player.sprite
-        if p.rect.centerx < parametres.screen_width / 2 and p.direction.x < 0:
-            self.deplacement = parametres.vitesse_joueur
+        if p is None:
+            return
+            
+        if p.rect.centerx < parametres_inf.screen_width / 2 and p.direction.x < 0:
+            self.deplacement = parametres_inf.vitesse_joueur
             p.v = 0
-        elif p.rect.centerx >  parametres.screen_width / 2 and p.direction.x > 0:
-            self.deplacement = -parametres.vitesse_joueur
+        elif p.rect.centerx >  parametres_inf.screen_width / 2 and p.direction.x > 0:
+            self.deplacement = -parametres_inf.vitesse_joueur
             p.v = 0
         else:
             self.deplacement = 0
-            p.v = parametres.vitesse_joueur
+            p.v = parametres_inf.vitesse_joueur
             
     def update_bgx(self,deplacement):
         """
@@ -141,6 +173,7 @@ class Level:
         - deplacement (int) : Valeur du déplacement horizontal.
         """
         self.bgx += deplacement
+        self.deplacement_counter += abs(deplacement)  # Track actual distance, not frames
 
     def collision_hori(self):
         """
@@ -166,8 +199,8 @@ class Level:
                     blocks_to_destroy = [
                         s for s in self.obstacles.sprites()
                         if s.rect.x == obstacle_rect.x and
-                        (s.rect.y == obstacle_rect.y - parametres.tile_size or  # Au-dessus
-                        s.rect.y == obstacle_rect.y + parametres.tile_size)   # En-dessous
+                        (s.rect.y == obstacle_rect.y - parametres_inf.tile_size or  # Au-dessus
+                        s.rect.y == obstacle_rect.y + parametres_inf.tile_size)   # En-dessous
                     ]
                     for block in blocks_to_destroy:
                         self.ajoute_particules(block.rect.center, "explosion")
@@ -285,6 +318,9 @@ class Level:
         Ajoute des particules pour les actions de saut et de course.
         """
         player=self.player.sprite
+        if player is None:  # Safety check
+            return
+            
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT]:
             self.ajoute_particules(player.rect.midbottom,"run")
@@ -326,7 +362,6 @@ class Level:
                 
                 
             elif powerup.val ==3:
-                print("ok")
                 self.player.sprite.activate_magnet()
                 powerup.kill()
 
@@ -343,7 +378,7 @@ class Level:
         font = pygame.font.Font("pixel_font.ttf", 36)  
         # Créer un rectangle pour contenir le score
         rect_width, rect_height = 200, 50
-        rect_x, rect_y = parametres.screen_width - rect_width - 10, 10  # Position du rectangle
+        rect_x, rect_y = parametres_inf.screen_width - rect_width - 10, 10  # Position du rectangle
         rect = pygame.Rect(rect_x, rect_y, rect_width, rect_height)
         # Dessiner le rectangle
         pygame.draw.rect(surface,(0,0,0), rect, 2, border_radius=10)
@@ -365,9 +400,9 @@ class Level:
         three = pygame.image.load('graphics/countdown/3.png').convert_alpha()
 
         # Définir les rectangles pour centrer les images
-        one_rect = one.get_rect(center=(parametres.screen_width // 2, parametres.screen_height // 2))
-        two_rect = two.get_rect(center=(parametres.screen_width // 2, parametres.screen_height // 2))
-        three_rect = three.get_rect(center=(parametres.screen_width // 2, parametres.screen_height // 2))
+        one_rect = one.get_rect(center=(parametres_inf.screen_width // 2, parametres_inf.screen_height // 2))
+        two_rect = two.get_rect(center=(parametres_inf.screen_width // 2, parametres_inf.screen_height // 2))
+        three_rect = three.get_rect(center=(parametres_inf.screen_width // 2, parametres_inf.screen_height // 2))
         self.draw_level(bg)
         self.window.blit(one, one_rect.topleft)
         pygame.display.update()
@@ -469,7 +504,6 @@ class Level:
             self.coins.update(self.deplacement)
             self.obstacles.update(self.deplacement)
             self.ground.update(self.deplacement)
-            self.goal.update(self.deplacement)
             self.powerups.update(self.deplacement)
             self.buses.update(self.deplacement)
             self.collision_torro()
@@ -485,17 +519,29 @@ class Level:
             
 
         
+        # Draw infinite scrolling background
+        bg_width = bg.get_width()
+        # Calculate wrapped background position
+        bg_x_wrapped = self.bgx % bg_width
         
+        # Draw two copies to ensure continuous background
+        self.window.blit(bg, (bg_x_wrapped, 0))
+        self.window.blit(bg, (bg_x_wrapped - bg_width, 0))
         
-        self.window.blit(bg,(self.bgx,0))
         self.bull.draw(self.window)
         self.obstacles.draw(self.window)
         self.ground.draw(self.window)
-        self.goal.draw(self.window)
         self.powerups.draw(self.window)
         self.buses.draw(self.window)
 
-        self.win_situation()
+        if self.deplacement_counter > parametres_inf.tile_size*self.m:
+            self.cat_map(parametres_inf.blocks_bank[1::])
+            new_length = len(self.map_0[0])
+            start_col = new_length - self.m
+            # Draw only the newly added block (last m columns of the new map)
+            self.draw_map(self.n_lines, new_length, start_col=start_col)
+            self.deplacement_counter = 0
+        
         self.bordure_x()
         self.collision_ver()
         self.collision_hori()

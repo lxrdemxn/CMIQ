@@ -1,4 +1,3 @@
-import pygame
 class Settings:
     def __init__(self):
         self.GRAVITY=1

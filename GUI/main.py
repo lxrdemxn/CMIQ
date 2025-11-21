@@ -3,6 +3,8 @@ import pygame
 from settings import parametres
 from player import *
 from level import *
+from inf_settings import *
+from inf_level import *
 import os
 from buttons import *
 
@@ -29,7 +31,10 @@ pause_screen_rect = pause_screen.get_rect(center=(parametres.screen_width // 2, 
 clock = pygame.time.Clock()
 
 # Initialisation du niveau avec une carte et la surface d'affichage
-level = Level(parametres.level_map[level_slct], screen)
+if level_slct != 2:
+    level = Level(parametres.level_map[level_slct], screen)
+else:
+    level = Inf_Level(screen)
 paused = False
 run = True
 level.wahd(bg)
