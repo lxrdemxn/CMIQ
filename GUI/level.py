@@ -41,6 +41,12 @@ class Level:
         # coins
         self._7amra = 0
         self.dirham = 0
+        
+        # Calculate map dimensions and create tiled background
+        self.map_rows = len(map)
+        self.map_cols = len(map[0]) if map else 0
+        self.map_width = self.map_cols * parametres.tile_size
+        self.tiled_bg = None  # Will be created in wahd() method
 
     def loading_level(self, map):
         """
@@ -285,6 +291,9 @@ class Level:
         Ajoute des particules pour les actions de saut et de course.
         """
         player=self.player.sprite
+        if player is None:  # Safety check if player doesn't exist
+            return
+            
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT]:
             self.ajoute_particules(player.rect.midbottom,"run")
@@ -359,6 +368,29 @@ class Level:
         Arguments :
         - bg (pygame.Surface) : Le fond d'écran actuel du niveau.
         """
+        # Create tiled background to cover entire map width
+        bg_width = bg.get_width()
+        bg_height = bg.get_height()
+        
+        # Load win background image
+        win_bg = pygame.image.load('graphics/game_won_icons/win_background.png').convert()
+        win_bg = pygame.transform.scale(win_bg, (bg_width, bg_height))
+        win_bg_width = win_bg.get_width()
+        
+        # Calculate how much space to fill with regular background before win background
+        # Reserve the last portion for win background
+        regular_bg_width = self.map_width - win_bg_width
+        num_tiles = (regular_bg_width // bg_width) + 1
+        
+        # Create surface to hold the entire background
+        self.tiled_bg = pygame.Surface((self.map_width, bg_height))
+        
+        # Fill with regular background tiles
+        for i in range(num_tiles):
+            self.tiled_bg.blit(bg, (i * bg_width, 0))
+        
+        # Place win background at the end (last portion of map)
+        self.tiled_bg.blit(win_bg, (self.map_width - win_bg_width, 0))
 
         one = pygame.image.load('graphics/countdown/1.png').convert_alpha()
         two = pygame.image.load('graphics/countdown/2.png').convert_alpha()
@@ -487,7 +519,11 @@ class Level:
         
         
         
-        self.window.blit(bg,(self.bgx,0))
+        # Use tiled background if available, otherwise fallback to single bg
+        if self.tiled_bg:
+            self.window.blit(self.tiled_bg,(self.bgx,0))
+        else:
+            self.window.blit(bg,(self.bgx,0))
         self.bull.draw(self.window)
         self.obstacles.draw(self.window)
         self.ground.draw(self.window)

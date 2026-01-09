@@ -141,9 +141,11 @@ class Inf_Level:
 
         self.draw_map(n, len(self.map_0[0]))
         
-        # Ensure player exists - if not created from map, create manually
+        # Ensure player exists - if not created from map, create manually at column 5 (6th column)
         if len(self.player.sprites()) == 0:
-            p = Player(100, 100 + (n - 2) * parametres_inf.tile_size, self.window)
+            player_x = 5 * parametres_inf.tile_size  # Column 5 (0-indexed = 6th column)
+            player_y = 100 + (n - 2) * parametres_inf.tile_size
+            p = Player(player_x, player_y, self.window)
             self.player.add(p)
              
                 

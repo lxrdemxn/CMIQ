@@ -26,8 +26,11 @@ level1_rect = level1_button.rect((parametres.screen_width//2,100))  # Center the
 level2_button = button('graphics/images_start_screen/level2_normal.png','graphics/images_start_screen/level2_hover.png')
 level2_rect = level1_button.rect((parametres.screen_width//2,180))  # Center the button
 
-level3_button = button('graphics/images_start_screen/level2_normal.png','graphics/images_start_screen/level2_hover.png')
+level3_button = button('graphics/images_start_screen/inf_level_normal.png','graphics/images_start_screen/inf_level_hover.png')
 level3_rect = level1_button.rect((parametres.screen_width//2,260))  # Center the button
+
+custom_levels_normal = button('graphics/images_start_screen/custom_level_normal.png','graphics/images_start_screen/custom_level_hover.png')
+custom_levels_rect = custom_levels_normal.rect((parametres.screen_width//2,340))  # Center the button
 
 # initialisation du niveau à 0 et de la variable "run"
 level_slct = 0
@@ -45,6 +48,7 @@ while run:
             if level1_rect.collidepoint(event.pos):
                 run = False
                 level_slct = 0
+                pygame.quit()
                 # ouverture du fichier du jeu avec le niveau 0
                 with open(file_path) as f:
                     code = f.read()
@@ -54,6 +58,7 @@ while run:
                 # au cas d'un click sur le boutton "LEVEL 2"
                 run = False
                 level_slct = 1
+                pygame.quit()
                 # ouverture du fichier du jeu avec le niveau 0
                 with open(file_path) as f:
                     code = f.read()
@@ -63,10 +68,23 @@ while run:
                 # au cas d'un click sur le boutton "LEVEL 2"
                 run = False
                 level_slct = 2
+                pygame.quit()
                 # ouverture du fichier du jeu avec le niveau 0
                 with open(file_path) as f:
                     code = f.read()
                     exec(code)
+                    
+            elif custom_levels_rect.collidepoint(event.pos):
+                # au cas d'un click sur le boutton "CUSTOM LEVELS"
+                run = False
+                pygame.quit()
+                import subprocess
+                import sys
+                import os
+                # ouverture du level editor
+                editor_path = os.path.join(os.path.dirname(file_path), 'level_editor_example.py')
+                subprocess.run([sys.executable, editor_path])
+                sys.exit()
                     
     # vérifie si la souris est sur le boutton
     mouse_pos = pygame.mouse.get_pos()  # donne la position actuelle de la souris
@@ -85,11 +103,17 @@ while run:
     else:
         level3_button.is_hovered = False
         
+    if custom_levels_rect.collidepoint(mouse_pos):  # si la souris est sur le boutton
+        custom_levels_normal.is_hovered = True
+    else:
+        custom_levels_normal.is_hovered = False
+        
     # affichage des élements de l'écran
     bg.draw(screen, (0,0))
     level1_button.draw(screen, level1_rect.topleft)
     level2_button.draw(screen, level2_rect.topleft)
     level3_button.draw(screen, level3_rect.topleft)
+    custom_levels_normal.draw(screen, custom_levels_rect.topleft)
          
     pygame.display.update()
             

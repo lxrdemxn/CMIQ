@@ -1,65 +1,50 @@
-# import des modules et classes
+# Play custom level - Similar to main.py but for custom levels
 import pygame
 from settings import parametres
 from player import *
 from level import *
-from inf_settings import *
-from inf_level import *
 import os
 from buttons import *
 import sys
-import json
+
+# Get the custom level map from command line argument or default
+if len(sys.argv) > 1:
+    import json
+    custom_level_map = json.loads(sys.argv[1])
+else:
+    # Default empty level if no argument provided
+    custom_level_map = []
+
+# Check if map is valid
+if not custom_level_map or len(custom_level_map) == 0:
+    print("Error: No level map provided!")
+    print("Usage: python play_custom_level.py '<map_json>'")
+    sys.exit(1)
 
 # Initialisation de Pygame
 pygame.init()
 
-file_path = "GUI/main.py"               # chemin relatif du fichier main.py
-
-# Get the level map from command line argument or use level_slct
-if len(sys.argv) > 1:
-    # Check for special infinite level marker
-    if sys.argv[1] == "INFINITE_LEVEL":
-        current_level_map = None
-        use_inf_level = True
-    else:
-        # Map passed as JSON argument
-        current_level_map = json.loads(sys.argv[1])
-        use_inf_level = False
-elif 'level_slct' in globals():
-    # Using level_slct from select_level.py
-    if level_slct != 2:
-        current_level_map = parametres.level_map[level_slct]
-        use_inf_level = False
-    else:
-        current_level_map = None
-        use_inf_level = True
-else:
-    # Default to level 0
-    current_level_map = parametres.level_map[0]
-    use_inf_level = False
+file_path = "GUI/play_custom_level.py"
 
 # Création de la fenêtre de jeu
 screen = pygame.display.set_mode((parametres.screen_width, parametres.screen_height))
-pygame.display.set_caption(parametres.nom_jeu)
+pygame.display.set_caption("Custom Level - " + parametres.nom_jeu)
 g = os.path.join("graphics","backgrounds", "background5.png")
 bg = pygame.image.load(g).convert()
 
 # Chargement des images des boutons
 replay_button = button('graphics/end_screen/replay_button_normal.png','graphics/end_screen/replay_button_hover.png')
 replay_button.resize(230,90)
-replay_rect = replay_button.rect((parametres.screen_width//2,parametres.screen_height//1.5))  # Position centrale du bouton
+replay_rect = replay_button.rect((parametres.screen_width//2,parametres.screen_height//1.5))
 
 pause_screen = pygame.image.load('graphics/pause_screen/pause_icon.png').convert_alpha()
 pause_screen_rect = pause_screen.get_rect(center=(parametres.screen_width // 2, parametres.screen_height // 2))
 
-# Initialisation de l'horloge pour gérer le taux de rafraîchissement
+# Initialisation de l'horloge
 clock = pygame.time.Clock()
 
-# Initialisation du niveau avec une carte et la surface d'affichage
-if use_inf_level:
-    level = Inf_Level(screen)
-else:
-    level = Level(current_level_map, screen)
+# Initialisation du niveau avec la carte personnalisée
+level = Level(custom_level_map, screen)
 paused = False
 run = True
 level.wahd(bg)
@@ -76,30 +61,28 @@ while run:
             if event.key == pygame.K_ESCAPE:
                 run = False
                 pygame.quit()
-                # Return to level selection
+                # Return to level editor
                 import subprocess
-                select_level_path = os.path.join(os.path.dirname(file_path), 'select_level.py')
-                subprocess.run([sys.executable, select_level_path])
+                import os
+                editor_path = os.path.join(os.path.dirname(file_path), 'level_editor_example.py')
+                subprocess.run([sys.executable, editor_path])
                 sys.exit()
                 
         if event.type == pygame.KEYDOWN:
             # au cas d'un click sur le boutton "P"
             if event.key == pygame.K_p:
-                if not paused and not level.isgameover:  # si le jeu est ni perdue ni en pause, le jeu se met en pause
+                if not paused and not level.isgameover:
                     level.pause = True
                     paused = True
-                else:                       # si le jeu est en pause, le jeu se reprend
+                else:
                     level.pause = False
                     paused = False
                     
         if event.type == pygame.MOUSEBUTTONDOWN and (level.isgameover or level.win):
-            # au cas d'un click sur le boutton "PLAY AGAIN" dans le cas d'une perte ou d'une vectoire
+            # au cas d'un click sur le boutton "PLAY AGAIN"
             if replay_rect.collidepoint(event.pos):
                 # Reinitialize the level without closing the window
-                if use_inf_level:
-                    level = Inf_Level(screen)
-                else:
-                    level = Level(current_level_map, screen)
+                level = Level(custom_level_map, screen)
                 paused = False
                 level.wahd(bg)
     
@@ -107,10 +90,10 @@ while run:
     level.draw_level(bg)
     
     if level.isgameover:
-        # Gestion de l'état "game over" : vérifie si la souris survole le bouton
+        # Gestion de l'état "game over"
         level.pause = True
-        mouse_pos = pygame.mouse.get_pos()  # Récupération de la position actuelle de la souris
-        if replay_rect.collidepoint(mouse_pos):  # Si la souris survole le bouton
+        mouse_pos = pygame.mouse.get_pos()
+        if replay_rect.collidepoint(mouse_pos):
             replay_button.is_hovered = False
         else:
             replay_button.is_hovered = True
@@ -118,7 +101,7 @@ while run:
         replay_button.draw(screen, replay_rect.topleft)
     
     if level.win:
-        # Gestion de l'état "victoire" : exécution d'un autre script
+        # Gestion de l'état "victoire"
         with open("GUI/youwon.py") as f:
             code = f.read()
             exec(code)

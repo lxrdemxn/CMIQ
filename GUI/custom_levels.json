@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Test Level",
+    "creator": "Anas El Haboussi",
+    "map": [
+      "                                             Y              ",
+      "                                             Y              ",
+      "                                             Y              ",
+      "                                             Y              ",
+      "                                             Y              ",
+      "              X                              Y              ",
+      "     P  S   XXX                              Y              ",
+      "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGYGGGGGGGGGGGGGG"
+    ]
+  },
+  {
+    "name": "Test Level",
+    "creator": "Anas",
+    "map": [
+      "                                             Y              ",
+      "                                             Y              ",
+      "                                             Y              ",
+      "                      0                      Y              ",
+      "                                             Y              ",
+      "              X    1  XX S                   Y              ",
+      "     P  S   XXX       XX                     Y              ",
+      "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGYGGGGGGGGGGGGGG"
+    ]
+  }
+]
