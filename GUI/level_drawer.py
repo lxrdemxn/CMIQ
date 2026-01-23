@@ -17,8 +17,8 @@ class Draw_Level():
         # Add default ground layer on the last line
         for col in range(self.map_size):
             self.map[self.n - 1][col] = "G"
-        # Add default goal (Y) blocks on the 15th to last column
-        goal_column = self.map_size - 15
+        # Add default goal (Y) blocks centered in the win_background area (middle of last third)
+        goal_column = int(self.map_size - (self.map_size * 0.15))
         for row in range(self.n):
             self.map[row][goal_column] = "Y"
         # Add default player spawn at the same position as in settings.py (row n-2, col 5)

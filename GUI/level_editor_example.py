@@ -174,8 +174,9 @@ def level_selection_screen():
     
     return None
 
-# Create level drawer
-level_drawer = Draw_Level(n_tiles=13, map_size=60)
+# Create level drawer with same dimensions as standard levels (8 rows × 200 columns)
+# Standard game map is 200 cols wide, 8 rows tall with tile_size=50 for proper win screen centering
+level_drawer = Draw_Level(n_tiles=13, map_size=200)
 
 # State management
 STATE_SELECTION = "selection"
@@ -196,11 +197,11 @@ while running:
         if result is None:
             running = False
         elif result.get("action") == "NEW":
-            level_drawer = Draw_Level(n_tiles=13, map_size=60)
+            level_drawer = Draw_Level(n_tiles=13, map_size=200)
             current_state = STATE_EDITING
         elif result.get("action") == "EDIT":
             # Load selected level for editing
-            level_drawer = Draw_Level(n_tiles=13, map_size=60)
+            level_drawer = Draw_Level(n_tiles=13, map_size=200)
             level_map = result["level"]["map"]
             # Load the map data
             for row_idx, row_data in enumerate(level_map):

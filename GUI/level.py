@@ -67,9 +67,11 @@ class Level:
         a= Bull(-50,100,150,450)
         self.bull.add(a)
         n = len(map)
-        m = len(map[0])
+        m = len(map[0]) if map else 0
         for i in range(n):
-            for j in range(m):
+            for j in range(len(map[i])):  # Use actual length of current row
+                if j >= len(map[i]):  # Safety check
+                    break
                 if map[i][j] == "X":
                     pos = (j * parametres.tile_size, 100+i * parametres.tile_size)
                     tile = Obstacle(pos, parametres.tile_size,"graphics/backgrounds/tuila.jpg")
