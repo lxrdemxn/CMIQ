@@ -12,7 +12,7 @@ class Settings:
     "G                        1                                 1                                       1                                1                                1       Y                  ",
     "G                               0                                                0                                                 1                                       Y Y                  ",
     "G              X     X      XX  XX             0        X       X       X    1   XX   1    X           X   0       X          X          X         X              XX       Y Y                  ",
-    "G    P   0  X  X     X  X   XX  XX  X    XX    XX       X       X0      X        XX   X    X     0     X  XX       X    0     X1         X         X     0         XX   1   YY                  ",
+    "G    P   0  X  X     X  X   XX  XX  X    XX    XX       X       X0      X        XX   X    X     0     X  XX       X    0     X1         X         X     0         XX   1   YYY                 ",
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
 ], [
     "G                                                                                                                             W                   S               W          Y                  ",

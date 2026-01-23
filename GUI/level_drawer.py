@@ -3,7 +3,7 @@ from settings import parametres
 import os
 
 class Draw_Level():
-    def __init__(self, n_tiles = 6, map_size = 32*3):
+    def __init__(self, n_tiles = 6, map_size = 100):
         """initialisation
 
         Args:
@@ -18,7 +18,7 @@ class Draw_Level():
         for col in range(self.map_size):
             self.map[self.n - 1][col] = "G"
         # Add default goal (Y) blocks centered in the win_background area (middle of last third)
-        goal_column = int(self.map_size - (self.map_size * 0.15))
+        goal_column = int(self.map_size - 14)
         for row in range(self.n):
             self.map[row][goal_column] = "Y"
         # Add default player spawn at the same position as in settings.py (row n-2, col 5)

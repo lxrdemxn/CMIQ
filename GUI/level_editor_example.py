@@ -74,10 +74,10 @@ def level_selection_screen():
         
         # Instructions
         inst_font = pg.font.Font(None, 24)
-        inst1 = inst_font.render("Click EDIT to edit level", True, (200, 200, 200))
-        inst2 = inst_font.render("Click PLAY to play level", True, (200, 200, 200))
-        inst3 = inst_font.render("Press N to create new level", True, (200, 200, 200))
-        inst4 = inst_font.render("Press ESC to exit", True, (200, 200, 200))
+        inst1 = inst_font.render("Click EDIT to edit level", True, (0, 0, 0))
+        inst2 = inst_font.render("Click PLAY to play level", True, (0, 0, 0))
+        inst3 = inst_font.render("Press N to create new level", True, (0, 0, 0))
+        inst4 = inst_font.render("Press ESC to exit", True, (0, 0, 0))
         screen.blit(inst1, (280, 90))
         screen.blit(inst2, (280, 115))
         screen.blit(inst3, (280, 140))
@@ -89,7 +89,7 @@ def level_selection_screen():
         visible_levels = 6
         
         if len(levels) == 0:
-            no_levels = pg.font.Font(None, 32).render("No levels created yet. Press N to create one!", True, (150, 150, 150))
+            no_levels = pg.font.Font(None, 32).render("No levels created yet. Press N to create one!", True, (0, 0, 0))
             screen.blit(no_levels, (150, 300))
         else:
             for i in range(scroll_offset, min(scroll_offset + visible_levels, len(levels))):

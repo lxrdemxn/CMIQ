@@ -11,6 +11,15 @@ def display():
     play_button.draw(win, play_rect.topleft) 
     game_name.draw(win, game_name_rect.topleft)
     sound_button.draw(win, (25,25))
+    
+    # Draw credits in bottom-right corner
+    font_small = pygame.font.Font(None, 24)
+    credits_text1 = font_small.render("Tarek OUCHOUKER and Anas EL HABOUSSI", True, (255, 255, 255))
+    credits_text2 = font_small.render("GameLab CS 2025 - 2026", True, (255, 255, 255))
+    
+    win.blit(credits_text1, (parametres.screen_width - credits_text1.get_width() - 20, parametres.screen_height - 60))
+    win.blit(credits_text2, (parametres.screen_width - credits_text2.get_width() - 20, parametres.screen_height - 30))
+    
     pygame.display.update()
 
 file_path = "GUI/select_level.py"                        # chemin relatif du fichier select_level.py
